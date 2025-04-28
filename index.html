@@ -16,9 +16,11 @@
         .summary, .change-output { margin-top: 20px; font-size: 18px; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 30px; border-radius: 12px; text-align: center; width: 300px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: fadeIn 0.3s ease-in-out; }
-        .modal-content input { font-size: 18px; margin-top: 10px; padding: 8px; width: 80%; }
-        .modal-content button { margin: 10px 5px 0 5px; padding: 10px 20px; font-size: 16px; cursor: pointer; border: none; border-radius: 5px; background-color: #4CAF50; color: white; transition: background-color 0.3s; }
-        .modal-content button:hover { background-color: #45a049; }
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .numpad button { padding: 15px; font-size: 20px; border: none; border-radius: 5px; background-color: #4CAF50; color: white; cursor: pointer; transition: background-color 0.3s; }
+        .numpad button:hover { background-color: #45a049; }
+        #amountDisplay { font-size: 24px; margin: 10px 0; }
+        .modal-content button.action { margin-top: 10px; }
         #modal-change { margin-top: 10px; font-size: 18px; color: #333; }
         @keyframes fadeIn { from {opacity: 0; transform: scale(0.9);} to {opacity: 1; transform: scale(1);} }
     </style>
@@ -28,7 +30,7 @@
         <img src="logo.png" alt="Halal Boys Logo">
     </div>
 
-    <h1>HALAL BOYS POS</h1>
+    <h1>School Business Fair POS</h1>
 
     <div class="items-container">
         <button class="item-button" data-item="Burger"><img src="burger.jpg" alt="Burger">Burger (AED 10)</button>
@@ -50,10 +52,23 @@
     <div class="modal" id="checkoutModal">
         <div class="modal-content">
             <div id="modal-total"></div>
-            <input type="number" id="amountReceived" placeholder="Amount Received">
+            <div id="amountDisplay">0</div>
+            <div class="numpad">
+                <button onclick="appendNumber(1)">1</button>
+                <button onclick="appendNumber(2)">2</button>
+                <button onclick="appendNumber(3)">3</button>
+                <button onclick="appendNumber(4)">4</button>
+                <button onclick="appendNumber(5)">5</button>
+                <button onclick="appendNumber(6)">6</button>
+                <button onclick="appendNumber(7)">7</button>
+                <button onclick="appendNumber(8)">8</button>
+                <button onclick="appendNumber(9)">9</button>
+                <button onclick="clearAmount()">C</button>
+                <button onclick="appendNumber(0)">0</button>
+                <button onclick="processPayment()">OK</button>
+            </div>
             <div id="modal-change"></div>
-            <button onclick="processPayment()">Submit</button>
-            <button onclick="closeAndClear()">Close</button>
+            <button class="action" onclick="closeAndClear()">Close</button>
         </div>
     </div>
 
@@ -62,6 +77,7 @@
     <script>
         const itemPrice = 10;
         let cart = {};
+        let amountInput = "";
         const successSound = document.getElementById('successSound');
 
         document.querySelectorAll('.item-button').forEach(button => {
@@ -96,7 +112,8 @@
 
             document.getElementById('modal-total').innerHTML = `Total: AED ${totalCost}`;
             document.getElementById('modal-change').innerHTML = "";
-            document.getElementById('amountReceived').value = "";
+            amountInput = "";
+            document.getElementById('amountDisplay').innerText = "0";
             document.getElementById('checkoutModal').style.display = 'flex';
         }
 
@@ -109,9 +126,19 @@
             closeModal();
         }
 
+        function appendNumber(num) {
+            amountInput += num.toString();
+            document.getElementById('amountDisplay').innerText = amountInput;
+        }
+
+        function clearAmount() {
+            amountInput = "";
+            document.getElementById('amountDisplay').innerText = "0";
+        }
+
         function processPayment() {
             let totalCost = Object.values(cart).reduce((acc, qty) => acc + qty * itemPrice, 0);
-            let amountReceived = parseFloat(document.getElementById('amountReceived').value);
+            let amountReceived = parseFloat(amountInput);
 
             if (isNaN(amountReceived)) {
                 document.getElementById('modal-change').innerText = "Please enter a valid amount.";
