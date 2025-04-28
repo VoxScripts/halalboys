@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Fair POS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .item-button, .checkout-button, .clear-button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .summary, .change-output {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>School Business Fair POS</h1>
+
+    <div>
+        <button class="item-button" data-item="Burger">Burger (AED 10)</button>
+        <button class="item-button" data-item="Nuggets">Nuggets (AED 10)</button>
+        <button class="item-button" data-item="Tenders">Tenders (AED 10)</button>
+        <button class="item-button" data-item="Magnet">Magnet (AED 10)</button>
+        <button class="item-button" data-item="Eraser">Eraser (AED 10)</button>
+        <button class="item-button" data-item="Pen">Pen (AED 10)</button>
+        <button class="item-button" data-item="Keychain">Keychain (AED 10)</button>
+    </div>
+
+    <div class="summary" id="summary">Cart is empty.</div>
+
+    <button class="checkout-button" onclick="checkout()">Checkout</button>
+    <button class="clear-button" onclick="clearCart()">Clear Cart</button>
+
+    <div class="change-output" id="change-output"></div>
+
+    <script>
+        const itemPrice = 10; // All items priced the same
+        let cart = {};
+
+        document.querySelectorAll('.item-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const item = button.getAttribute('data-item');
+                cart[item] = (cart[item] || 0) + 1;
+                updateSummary();
+            });
+        });
+
+        function updateSummary() {
+            let summaryText = "";
+            let totalItems = 0;
+
+            for (let item in cart) {
+                summaryText += `${item}: ${cart[item]}<br>`;
+                totalItems += cart[item];
+            }
+
+            if (totalItems === 0) summaryText = "Cart is empty.";
+
+            document.getElementById('summary').innerHTML = summaryText;
+        }
+
+        function checkout() {
+            let totalCost = Object.values(cart).reduce((acc, qty) => acc + qty * itemPrice, 0);
+
+            if (totalCost === 0) {
+                alert("Cart is empty! Add items first.");
+                return;
+            }
+
+            let amountReceived = parseFloat(prompt(`Total: AED ${totalCost}\nEnter amount received:`));
+
+            if (isNaN(amountReceived) || amountReceived < totalCost) {
+                alert("Invalid amount or insufficient funds received.");
+                return;
+            }
+
+            let change = amountReceived - totalCost;
+            document.getElementById('change-output').innerHTML = `Change: AED ${change.toFixed(2)}`;
+            updateSummary();
+        }
+
+        function clearCart() {
+            cart = {};
+            document.getElementById('change-output').innerHTML = "";
+            updateSummary();
+        }
+    </script>
+</body>
+</html>
