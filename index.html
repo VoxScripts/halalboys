@@ -44,6 +44,35 @@
             margin-top: 20px;
             font-size: 18px;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .modal-content input {
+            font-size: 18px;
+            margin-top: 10px;
+            padding: 5px;
+            width: 100px;
+        }
+        .modal-content button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -82,13 +111,23 @@
 
     <div class="summary" id="summary">Cart is empty.</div>
 
-    <button class="checkout-button" onclick="checkout()">Checkout</button>
+    <button class="checkout-button" onclick="openModal()">Checkout</button>
     <button class="clear-button" onclick="clearCart()">Clear Cart</button>
 
     <div class="change-output" id="change-output"></div>
 
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content">
+            <div id="modal-total"></div>
+            <input type="number" id="amountReceived" placeholder="Amount Received">
+            <br>
+            <button onclick="processPayment()">Submit</button>
+            <button onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
     <script>
-        const itemPrice = 10; // All items priced the same
+        const itemPrice = 10;
         let cart = {};
 
         document.querySelectorAll('.item-button').forEach(button => {
@@ -113,7 +152,7 @@
             document.getElementById('summary').innerHTML = summaryText;
         }
 
-        function checkout() {
+        function openModal() {
             let totalCost = Object.values(cart).reduce((acc, qty) => acc + qty * itemPrice, 0);
 
             if (totalCost === 0) {
@@ -121,16 +160,33 @@
                 return;
             }
 
-            let amountReceived = parseFloat(prompt(`Total: AED ${totalCost}\nEnter amount received:`));
+            document.getElementById('modal-total').innerHTML = `Total: AED ${totalCost}`;
+            document.getElementById('checkoutModal').style.display = 'flex';
+        }
 
-            if (isNaN(amountReceived) || amountReceived < totalCost) {
-                alert("Invalid amount or insufficient funds received.");
+        function closeModal() {
+            document.getElementById('checkoutModal').style.display = 'none';
+        }
+
+        function processPayment() {
+            let totalCost = Object.values(cart).reduce((acc, qty) => acc + qty * itemPrice, 0);
+            let amountReceived = parseFloat(document.getElementById('amountReceived').value);
+
+            if (isNaN(amountReceived)) {
+                alert("Please enter a valid amount.");
                 return;
             }
 
-            let change = amountReceived - totalCost;
-            document.getElementById('change-output').innerHTML = `Change: AED ${change.toFixed(2)}`;
-            updateSummary();
+            if (amountReceived < totalCost) {
+                let shortfall = (totalCost - amountReceived).toFixed(2);
+                document.getElementById('change-output').innerHTML = `Need AED ${shortfall} more.`;
+            } else {
+                let change = amountReceived - totalCost;
+                document.getElementById('change-output').innerHTML = `Change: AED ${change.toFixed(2)}`;
+                clearCart();
+            }
+
+            closeModal();
         }
 
         function clearCart() {
